@@ -256,6 +256,7 @@ void ws2812_indicate_layer(void) {
     LOG_INF("Indicating layer %d with %d blinks", layer, pattern.repeat_count);
     k_msgq_put(&led_msgq, &pattern, K_NO_WAIT);
 }
+#endif // Split check
 
 #if IS_ENABLED(CONFIG_WS2812_WIDGET_SHOW_LAYER_CHANGE)
 static struct k_work_delayable layer_indicate_work;
