@@ -1,7 +1,7 @@
 / {
 	behaviors {
 		/omit-if-no-ref/ ws2812_wdg: ws2812_widget {
-			compatible = "zmk,ws2812-widget";
+			compatible = "zmk,behavior-ws2812-widget";
 			#binding-cells = <0>;
 			indicate-battery;
 			indicate-connectivity;

@@ -1,6 +1,6 @@
 description: WS2812 LED widget behavior
 
-compatible: "zmk,ws2812-widget"
+compatible: "zmk,behavior-ws2812-widget"
 
 include: one_param.yaml
 
