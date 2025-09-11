@@ -257,6 +257,7 @@ void ws2812_indicate_layer(void) {
     k_msgq_put(&led_msgq, &pattern, K_NO_WAIT);
 }
 
+#if IS_ENABLED(CONFIG_WS2812_WIDGET_SHOW_LAYER_CHANGE)
 static struct k_work_delayable layer_indicate_work;
 static int led_layer_listener_cb(const zmk_event_t *eh) {
     if (initialized && as_zmk_layer_state_changed(eh)->state) {
@@ -271,7 +272,6 @@ static void indicate_layer_cb(struct k_work *work) {
 
 ZMK_LISTENER(led_layer_listener, led_layer_listener_cb);
 ZMK_SUBSCRIPTION(led_layer_listener, zmk_layer_state_changed);
-#endif
 #endif // Layer change
 
 // LED processing thread
