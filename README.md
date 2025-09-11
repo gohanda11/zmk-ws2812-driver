@@ -6,9 +6,11 @@ A ZMK module that provides WS2812 RGB LED indicator functionality for keyboard s
 
 - **Battery Level Indication**: Visual feedback for battery status with color-coded alerts
 - **Connectivity Status**: Shows USB/BLE connection states with different colors
-- **Layer Change Indication**: Blink patterns to indicate active keyboard layers
+- **Layer-Specific Colors**: Persistent colors for each layer (0=off, 1=red, 2=green, 3=yellow, 4=blue, 5=purple, 6=cyan)
+- **Activity State Management**: LEDs turn off during sleep and restore on wake
 - **Configurable Colors**: Full RGB color customization via Kconfig
 - **Flexible Patterns**: Customizable blink durations and repeat counts
+- **Split Keyboard Support**: Proper central/peripheral role handling
 
 ## Hardware Requirements
 
@@ -147,8 +149,21 @@ CONFIG_WS2812_WIDGET_CONN_COLOR_CONNECTED=0x0000FF    # Blue (BLE connected)
 CONFIG_WS2812_WIDGET_CONN_COLOR_ADVERTISING=0x00FFFF  # Cyan (BLE advertising)
 CONFIG_WS2812_WIDGET_CONN_COLOR_DISCONNECTED=0xFF0000 # Red (disconnected)
 
-# Layer indication
-CONFIG_WS2812_WIDGET_LAYER_COLOR=0xFFFFFF             # White
+# Layer-specific persistent colors
+CONFIG_WS2812_WIDGET_LAYER_0_COLOR=0x000000          # Layer 0: Off/Black
+CONFIG_WS2812_WIDGET_LAYER_1_COLOR=0xFF0000          # Layer 1: Red
+CONFIG_WS2812_WIDGET_LAYER_2_COLOR=0x00FF00          # Layer 2: Green  
+CONFIG_WS2812_WIDGET_LAYER_3_COLOR=0xFFFF00          # Layer 3: Yellow
+CONFIG_WS2812_WIDGET_LAYER_4_COLOR=0x0000FF          # Layer 4: Blue
+CONFIG_WS2812_WIDGET_LAYER_5_COLOR=0xFF00FF          # Layer 5: Purple/Magenta
+CONFIG_WS2812_WIDGET_LAYER_6_COLOR=0x00FFFF          # Layer 6: Cyan
+
+# Layer change blink indication
+CONFIG_WS2812_WIDGET_LAYER_COLOR=0xFFFFFF            # White (for blink patterns)
+
+# Feature toggles
+CONFIG_WS2812_WIDGET_SHOW_LAYER_CHANGE=y             # Enable layer color display
+CONFIG_WS2812_WIDGET_SHOW_LAYER_COLORS=n             # Use persistent colors (not blink sequences)
 ```
 
 ## Usage
@@ -166,17 +181,42 @@ The widget provides several indication methods:
 
 ### Status Patterns
 - **Battery**: 3 blinks in appropriate color based on level
-- **Connectivity**: Number of blinks = BLE profile number + 1
-- **Layers**: Number of blinks = layer number + 1
+- **Connectivity**: Number of blinks = BLE profile number + 1  
+- **Layers**: Persistent colors showing active layer (configurable per layer)
+- **Activity States**: LEDs automatically turn off during sleep and restore on wake
 
 ## Power Considerations
 
 WS2812 LEDs have significant current draw. For battery-powered keyboards:
 
 1. Use a power switching circuit to completely disconnect LEDs when not in use
-2. Consider reducing LED count or brightness
+2. Consider reducing LED count or brightness (see brightness control below)
 3. Minimize automatic indication frequency
 4. Test battery life impact thoroughly
+5. Layer 0 automatically turns LEDs off to save power
+
+## Brightness Control
+
+To reduce power consumption and LED intensity, you can adjust the RGB values to be dimmer. For example, to reduce brightness to approximately half:
+
+```conf
+# Dimmed layer colors (roughly 50% brightness)
+CONFIG_WS2812_WIDGET_LAYER_0_COLOR=0x000000          # Layer 0: Off/Black
+CONFIG_WS2812_WIDGET_LAYER_1_COLOR=0x7F0000          # Layer 1: Dimmed Red
+CONFIG_WS2812_WIDGET_LAYER_2_COLOR=0x007F00          # Layer 2: Dimmed Green  
+CONFIG_WS2812_WIDGET_LAYER_3_COLOR=0x7F7F00          # Layer 3: Dimmed Yellow
+CONFIG_WS2812_WIDGET_LAYER_4_COLOR=0x00007F          # Layer 4: Dimmed Blue
+CONFIG_WS2812_WIDGET_LAYER_5_COLOR=0x7F007F          # Layer 5: Dimmed Purple
+CONFIG_WS2812_WIDGET_LAYER_6_COLOR=0x007F7F          # Layer 6: Dimmed Cyan
+
+# Dimmed battery colors
+CONFIG_WS2812_WIDGET_BATTERY_COLOR_HIGH=0x007F00     # Dimmed Green
+CONFIG_WS2812_WIDGET_BATTERY_COLOR_MEDIUM=0x7F7F00   # Dimmed Yellow
+CONFIG_WS2812_WIDGET_BATTERY_COLOR_LOW=0x7F4000      # Dimmed Orange
+CONFIG_WS2812_WIDGET_BATTERY_COLOR_CRITICAL=0x7F0000 # Dimmed Red
+```
+
+**Note**: RGB values are in hexadecimal where FF = 255 (maximum), so 7F = 127 (approximately half brightness). Adjust values as needed for your preference.
 
 ## Troubleshooting
 
