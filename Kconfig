@@ -148,4 +148,40 @@ config WS2812_WIDGET_LAYER_COLOR
 	default 0xFFFFFF
 	depends on WS2812_WIDGET_SHOW_LAYER_CHANGE
 
+# Layer-specific colors (0=off, 1=red, 2=green, 3=yellow, 4=blue, 5=purple, 6=cyan)
+config WS2812_WIDGET_LAYER_0_COLOR
+	hex "Layer 0 color (off)"
+	default 0x000000
+	depends on WS2812_WIDGET_SHOW_LAYER_CHANGE
+
+config WS2812_WIDGET_LAYER_1_COLOR
+	hex "Layer 1 color (red)"
+	default 0xFF0000
+	depends on WS2812_WIDGET_SHOW_LAYER_CHANGE
+
+config WS2812_WIDGET_LAYER_2_COLOR
+	hex "Layer 2 color (green)"
+	default 0x00FF00
+	depends on WS2812_WIDGET_SHOW_LAYER_CHANGE
+
+config WS2812_WIDGET_LAYER_3_COLOR
+	hex "Layer 3 color (yellow)"
+	default 0xFFFF00
+	depends on WS2812_WIDGET_SHOW_LAYER_CHANGE
+
+config WS2812_WIDGET_LAYER_4_COLOR
+	hex "Layer 4 color (blue)"
+	default 0x0000FF
+	depends on WS2812_WIDGET_SHOW_LAYER_CHANGE
+
+config WS2812_WIDGET_LAYER_5_COLOR
+	hex "Layer 5 color (purple)"
+	default 0xFF00FF
+	depends on WS2812_WIDGET_SHOW_LAYER_CHANGE
+
+config WS2812_WIDGET_LAYER_6_COLOR
+	hex "Layer 6 color (cyan)"
+	default 0x00FFFF
+	depends on WS2812_WIDGET_SHOW_LAYER_CHANGE
+
 endif

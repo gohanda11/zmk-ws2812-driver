@@ -243,14 +243,14 @@ ZMK_SUBSCRIPTION(led_output_listener, zmk_split_peripheral_status_changed);
 // Layer color mapping: 0=off, 1=red, 2=green, 3=yellow, 4=blue, 5=purple, 6=cyan
 static struct led_rgb get_layer_color(uint8_t layer) {
     switch (layer) {
-        case 0: return (struct led_rgb){0, 0, 0};       // Off
-        case 1: return (struct led_rgb){255, 0, 0};     // Red
-        case 2: return (struct led_rgb){0, 255, 0};     // Green
-        case 3: return (struct led_rgb){255, 255, 0};   // Yellow
-        case 4: return (struct led_rgb){0, 0, 255};     // Blue
-        case 5: return (struct led_rgb){255, 0, 255};   // Purple
-        case 6: return (struct led_rgb){0, 255, 255};   // Cyan
-        default: return (struct led_rgb){255, 255, 255}; // White for other layers
+        case 0: return hex_to_rgb(CONFIG_WS2812_WIDGET_LAYER_0_COLOR);
+        case 1: return hex_to_rgb(CONFIG_WS2812_WIDGET_LAYER_1_COLOR);
+        case 2: return hex_to_rgb(CONFIG_WS2812_WIDGET_LAYER_2_COLOR);
+        case 3: return hex_to_rgb(CONFIG_WS2812_WIDGET_LAYER_3_COLOR);
+        case 4: return hex_to_rgb(CONFIG_WS2812_WIDGET_LAYER_4_COLOR);
+        case 5: return hex_to_rgb(CONFIG_WS2812_WIDGET_LAYER_5_COLOR);
+        case 6: return hex_to_rgb(CONFIG_WS2812_WIDGET_LAYER_6_COLOR);
+        default: return hex_to_rgb(CONFIG_WS2812_WIDGET_COLOR_WHITE);
     }
 }
 
@@ -273,7 +273,29 @@ void ws2812_indicate_layer(void) {
 static struct k_work_delayable layer_indicate_work;
 static int led_layer_listener_cb(const zmk_event_t *eh) {
 #if !IS_ENABLED(CONFIG_ZMK_SPLIT) || IS_ENABLED(CONFIG_ZMK_SPLIT_ROLE_CENTRAL)
-    if (initialized && as_zmk_layer_state_changed(eh)->state) {
+    // Check if this is an activity state changed event
+    struct zmk_activity_state_changed *activity_ev = as_zmk_activity_state_changed(eh);
+    if (activity_ev != NULL) {
+        switch (activity_ev->state) {
+        case ZMK_ACTIVITY_SLEEP:
+            LOG_INF("Detected sleep activity state, turn off LED");
+            set_leds_color((struct led_rgb){0, 0, 0});
+            current_color = (struct led_rgb){0, 0, 0};
+            break;
+        case ZMK_ACTIVITY_ACTIVE:
+            // When waking up, restore the current layer color
+            if (initialized) {
+                k_work_reschedule(&layer_indicate_work, K_MSEC(CONFIG_WS2812_WIDGET_LAYER_DEBOUNCE_MS));
+            }
+            break;
+        default:
+            break;
+        }
+        return 0;
+    }
+
+    // It must be a layer change event - handle both activation and deactivation
+    if (initialized) {
         k_work_reschedule(&layer_indicate_work, K_MSEC(CONFIG_WS2812_WIDGET_LAYER_DEBOUNCE_MS));
     }
 #endif
@@ -289,6 +311,7 @@ static void indicate_layer_cb(struct k_work *work) {
 #if !IS_ENABLED(CONFIG_ZMK_SPLIT) || IS_ENABLED(CONFIG_ZMK_SPLIT_ROLE_CENTRAL)
 ZMK_LISTENER(led_layer_listener, led_layer_listener_cb);
 ZMK_SUBSCRIPTION(led_layer_listener, zmk_layer_state_changed);
+ZMK_SUBSCRIPTION(led_layer_listener, zmk_activity_state_changed);
 #endif
 #endif // Layer change
 
