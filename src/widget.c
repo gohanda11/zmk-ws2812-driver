@@ -240,21 +240,33 @@ ZMK_SUBSCRIPTION(led_output_listener, zmk_split_peripheral_status_changed);
 #endif
 #endif // Connectivity
 
+// Layer color mapping: 0=off, 1=red, 2=green, 3=yellow, 4=blue, 5=purple, 6=cyan
+static struct led_rgb get_layer_color(uint8_t layer) {
+    switch (layer) {
+        case 0: return (struct led_rgb){0, 0, 0};       // Off
+        case 1: return (struct led_rgb){255, 0, 0};     // Red
+        case 2: return (struct led_rgb){0, 255, 0};     // Green
+        case 3: return (struct led_rgb){255, 255, 0};   // Yellow
+        case 4: return (struct led_rgb){0, 0, 255};     // Blue
+        case 5: return (struct led_rgb){255, 0, 255};   // Purple
+        case 6: return (struct led_rgb){0, 255, 255};   // Cyan
+        default: return (struct led_rgb){255, 255, 255}; // White for other layers
+    }
+}
+
 // Layer indication  
 #if IS_ENABLED(CONFIG_WS2812_WIDGET_SHOW_LAYER_CHANGE)
 #if !IS_ENABLED(CONFIG_ZMK_SPLIT) || IS_ENABLED(CONFIG_ZMK_SPLIT_ROLE_CENTRAL)
+
 void ws2812_indicate_layer(void) {
     uint8_t layer = zmk_keymap_highest_layer_active();
+    struct led_rgb color = get_layer_color(layer);
     
-    struct blink_pattern pattern = {
-        .color = hex_to_rgb(CONFIG_WS2812_WIDGET_LAYER_COLOR),
-        .duration_ms = CONFIG_WS2812_WIDGET_LAYER_BLINK_MS,
-        .pause_ms = CONFIG_WS2812_WIDGET_LAYER_BLINK_MS,
-        .repeat_count = layer + 1
-    };
+    LOG_INF("Setting layer %d color: r:%d g:%d b:%d", layer, color.r, color.g, color.b);
     
-    LOG_INF("Indicating layer %d with %d blinks", layer, pattern.repeat_count);
-    k_msgq_put(&led_msgq, &pattern, K_NO_WAIT);
+    // Set persistent color directly instead of using blink pattern
+    set_leds_color(color);
+    current_color = color;
 }
 #endif // Split check
 
@@ -301,8 +313,19 @@ extern void led_process_thread(void *d0, void *d1, void *d2) {
         
         execute_blink_pattern(pattern);
         
-        // Return to off state after pattern
+        // Return to current layer color after pattern
+#if IS_ENABLED(CONFIG_WS2812_WIDGET_SHOW_LAYER_CHANGE)
+#if !IS_ENABLED(CONFIG_ZMK_SPLIT) || IS_ENABLED(CONFIG_ZMK_SPLIT_ROLE_CENTRAL)
+        uint8_t layer = zmk_keymap_highest_layer_active();
+        struct led_rgb layer_color = get_layer_color(layer);
+        set_leds_color(layer_color);
+        current_color = layer_color;
+#else
         set_leds_color((struct led_rgb){0, 0, 0});
+#endif
+#else
+        set_leds_color((struct led_rgb){0, 0, 0});
+#endif
         k_sleep(K_MSEC(CONFIG_WS2812_WIDGET_INTERVAL_MS));
     }
 }
@@ -333,6 +356,18 @@ extern void led_init_thread(void *d0, void *d1, void *d2) {
 #if IS_ENABLED(CONFIG_WS2812_WIDGET_SHOW_CONNECTIVITY)
     LOG_INF("Indicating initial connectivity status");
     ws2812_indicate_connectivity();
+#endif
+
+#if IS_ENABLED(CONFIG_WS2812_WIDGET_SHOW_LAYER_CHANGE)
+#if !IS_ENABLED(CONFIG_ZMK_SPLIT) || IS_ENABLED(CONFIG_ZMK_SPLIT_ROLE_CENTRAL)
+    // Set initial layer color
+    k_sleep(K_MSEC(CONFIG_WS2812_WIDGET_INTERVAL_MS));
+    uint8_t initial_layer = zmk_keymap_highest_layer_active();
+    struct led_rgb initial_color = get_layer_color(initial_layer);
+    set_leds_color(initial_color);
+    current_color = initial_color;
+    LOG_INF("Set initial layer %d color: r:%d g:%d b:%d", initial_layer, initial_color.r, initial_color.g, initial_color.b);
+#endif
 #endif
 
     initialized = true;
