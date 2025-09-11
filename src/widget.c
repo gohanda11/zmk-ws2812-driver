@@ -274,8 +274,10 @@ static void indicate_layer_cb(struct k_work *work) {
 #endif
 }
 
+#if !IS_ENABLED(CONFIG_ZMK_SPLIT) || IS_ENABLED(CONFIG_ZMK_SPLIT_ROLE_CENTRAL)
 ZMK_LISTENER(led_layer_listener, led_layer_listener_cb);
 ZMK_SUBSCRIPTION(led_layer_listener, zmk_layer_state_changed);
+#endif
 #endif // Layer change
 
 // LED processing thread
