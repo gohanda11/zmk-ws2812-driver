@@ -260,14 +260,18 @@ void ws2812_indicate_layer(void) {
 
 static struct k_work_delayable layer_indicate_work;
 static int led_layer_listener_cb(const zmk_event_t *eh) {
+#if !IS_ENABLED(CONFIG_ZMK_SPLIT) || IS_ENABLED(CONFIG_ZMK_SPLIT_ROLE_CENTRAL)
     if (initialized && as_zmk_layer_state_changed(eh)->state) {
         k_work_reschedule(&layer_indicate_work, K_MSEC(CONFIG_WS2812_WIDGET_LAYER_DEBOUNCE_MS));
     }
+#endif
     return 0;
 }
 
 static void indicate_layer_cb(struct k_work *work) { 
+#if !IS_ENABLED(CONFIG_ZMK_SPLIT) || IS_ENABLED(CONFIG_ZMK_SPLIT_ROLE_CENTRAL)
     ws2812_indicate_layer(); 
+#endif
 }
 
 ZMK_LISTENER(led_layer_listener, led_layer_listener_cb);
