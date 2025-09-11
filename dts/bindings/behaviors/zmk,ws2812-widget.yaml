@@ -1,0 +1,18 @@
+description: WS2812 LED widget behavior
+
+compatible: "zmk,ws2812-widget"
+
+include: one_param.yaml
+
+properties:
+  indicate-battery:
+    type: boolean
+    description: Whether to indicate battery status when triggered
+
+  indicate-connectivity:
+    type: boolean  
+    description: Whether to indicate connectivity status when triggered
+
+  indicate-layer:
+    type: boolean
+    description: Whether to indicate layer status when triggered

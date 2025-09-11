@@ -1,0 +1,151 @@
+config WS2812_WIDGET
+	bool "Enable WS2812 LED widget for showing battery and output status"
+	depends on LED_STRIP
+	select LED_STRIP_WS2812
+	help
+	  Enable WS2812 RGB LED widget for keyboard status indication.
+
+if WS2812_WIDGET
+
+config WS2812_WIDGET_BATTERY_BLINK_MS
+	int "Battery level blink duration in milliseconds"
+	default 200
+
+config WS2812_WIDGET_CONN_BLINK_MS
+	int "Connectivity blink duration in milliseconds"
+	default 150
+
+config WS2812_WIDGET_LAYER_BLINK_MS
+	int "Layer change blink duration in milliseconds"
+	default 100
+
+config WS2812_WIDGET_INTERVAL_MS
+	int "Interval between blinks in milliseconds"
+	default 200
+
+config WS2812_WIDGET_SHOW_LAYER_CHANGE
+	bool "Indicate layer changes with a sequence of blinks"
+	default y
+
+config WS2812_WIDGET_LAYER_DEBOUNCE_MS
+	int "Debounce layer change notifications in milliseconds"
+	default 30
+
+config WS2812_WIDGET_SHOW_LAYER_COLORS
+	bool "Show persistent layer colors instead of blink sequences"
+	default n
+	help
+	  Mutually exclusive with WS2812_WIDGET_SHOW_LAYER_CHANGE
+
+config WS2812_WIDGET_SHOW_BATTERY
+	bool "Indicate battery level on startup and during changes"
+	depends on ZMK_BATTERY_REPORTING
+	default y
+
+config WS2812_WIDGET_BATTERY_LEVEL_HIGH
+	int "High battery level percentage"
+	default 80
+	depends on WS2812_WIDGET_SHOW_BATTERY
+
+config WS2812_WIDGET_BATTERY_LEVEL_LOW
+	int "Low battery level percentage"  
+	default 20
+	depends on WS2812_WIDGET_SHOW_BATTERY
+
+config WS2812_WIDGET_BATTERY_LEVEL_CRITICAL
+	int "Critical battery level percentage"
+	default 5
+	depends on WS2812_WIDGET_SHOW_BATTERY
+
+config WS2812_WIDGET_SHOW_CONNECTIVITY
+	bool "Indicate BLE connectivity status"
+	depends on ZMK_BLE
+	default y
+
+config WS2812_WIDGET_CONN_SHOW_USB
+	bool "Show USB connection status"
+	depends on ZMK_USB && WS2812_WIDGET_SHOW_CONNECTIVITY
+	default y
+
+# Color definitions (RGB values in hex, e.g., 0xFF0000 for red)
+config WS2812_WIDGET_COLOR_RED
+	hex "Red color value"
+	default 0xFF0000
+
+config WS2812_WIDGET_COLOR_GREEN  
+	hex "Green color value"
+	default 0x00FF00
+
+config WS2812_WIDGET_COLOR_BLUE
+	hex "Blue color value"
+	default 0x0000FF
+
+config WS2812_WIDGET_COLOR_YELLOW
+	hex "Yellow color value"  
+	default 0xFFFF00
+
+config WS2812_WIDGET_COLOR_MAGENTA
+	hex "Magenta color value"
+	default 0xFF00FF
+
+config WS2812_WIDGET_COLOR_CYAN
+	hex "Cyan color value"
+	default 0x00FFFF
+
+config WS2812_WIDGET_COLOR_WHITE
+	hex "White color value"
+	default 0xFFFFFF
+
+config WS2812_WIDGET_COLOR_OFF
+	hex "Off/Black color value"
+	default 0x000000
+
+# Battery colors
+config WS2812_WIDGET_BATTERY_COLOR_HIGH
+	hex "High battery level color"
+	default 0x00FF00
+	depends on WS2812_WIDGET_SHOW_BATTERY
+
+config WS2812_WIDGET_BATTERY_COLOR_MEDIUM
+	hex "Medium battery level color"
+	default 0xFFFF00  
+	depends on WS2812_WIDGET_SHOW_BATTERY
+
+config WS2812_WIDGET_BATTERY_COLOR_LOW
+	hex "Low battery level color"
+	default 0xFF8000
+	depends on WS2812_WIDGET_SHOW_BATTERY
+
+config WS2812_WIDGET_BATTERY_COLOR_CRITICAL
+	hex "Critical battery level color"
+	default 0xFF0000
+	depends on WS2812_WIDGET_SHOW_BATTERY
+
+# Connectivity colors
+config WS2812_WIDGET_CONN_COLOR_USB
+	hex "USB connected color"
+	default 0x00FF00
+	depends on WS2812_WIDGET_CONN_SHOW_USB
+
+config WS2812_WIDGET_CONN_COLOR_CONNECTED
+	hex "BLE connected color" 
+	default 0x0000FF
+	depends on WS2812_WIDGET_SHOW_CONNECTIVITY
+
+config WS2812_WIDGET_CONN_COLOR_ADVERTISING
+	hex "BLE advertising color"
+	default 0x00FFFF
+	depends on WS2812_WIDGET_SHOW_CONNECTIVITY
+
+config WS2812_WIDGET_CONN_COLOR_DISCONNECTED
+	hex "BLE disconnected color"
+	default 0xFF0000  
+	depends on WS2812_WIDGET_SHOW_CONNECTIVITY
+
+# Layer colors
+config WS2812_WIDGET_LAYER_COLOR
+	hex "Layer change indication color"
+	default 0xFFFFFF
+	depends on WS2812_WIDGET_SHOW_LAYER_CHANGE
+
+endif
