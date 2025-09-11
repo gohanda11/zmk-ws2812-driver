@@ -37,12 +37,7 @@ LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 static const struct device *led_strip = DEVICE_DT_GET(WS2812_STRIP_NODE);
 static const uint32_t num_pixels = DT_PROP(WS2812_STRIP_NODE, chain_length);
 
-// Color structure for RGB values
-struct led_rgb {
-    uint8_t r;
-    uint8_t g; 
-    uint8_t b;
-};
+// Using official Zephyr struct led_rgb from zephyr/drivers/led_strip.h
 
 // Convert hex color to RGB struct
 static struct led_rgb hex_to_rgb(uint32_t hex_color) {

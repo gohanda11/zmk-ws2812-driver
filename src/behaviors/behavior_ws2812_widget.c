@@ -16,7 +16,7 @@ struct behavior_ws2812_wdg_config {
     bool indicate_layer;
 };
 
-static int behavior_ws2812_wdg_init(const struct device *dev) { return 0; }
+static int __maybe_unused behavior_ws2812_wdg_init(const struct device *dev) { return 0; }
 
 static int on_keymap_binding_pressed(struct zmk_behavior_binding *binding,
                                      struct zmk_behavior_binding_event event) {
@@ -49,7 +49,7 @@ static int on_keymap_binding_released(struct zmk_behavior_binding *binding,
     return ZMK_BEHAVIOR_OPAQUE;
 }
 
-static const struct behavior_driver_api behavior_ws2812_wdg_driver_api = {
+static const struct behavior_driver_api __maybe_unused behavior_ws2812_wdg_driver_api = {
     .binding_pressed = on_keymap_binding_pressed,
     .binding_released = on_keymap_binding_released,
     .locality = BEHAVIOR_LOCALITY_GLOBAL,
