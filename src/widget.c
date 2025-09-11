@@ -258,7 +258,6 @@ void ws2812_indicate_layer(void) {
 }
 #endif // Split check
 
-#if IS_ENABLED(CONFIG_WS2812_WIDGET_SHOW_LAYER_CHANGE)
 static struct k_work_delayable layer_indicate_work;
 static int led_layer_listener_cb(const zmk_event_t *eh) {
     if (initialized && as_zmk_layer_state_changed(eh)->state) {
