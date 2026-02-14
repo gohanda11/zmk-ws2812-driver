@@ -170,7 +170,8 @@ static void indicate_connectivity_internal(void) {
     };
 
 #if !IS_ENABLED(CONFIG_ZMK_SPLIT) || IS_ENABLED(CONFIG_ZMK_SPLIT_ROLE_CENTRAL)
-    switch (zmk_endpoints_selected().transport) {
+    struct zmk_endpoint_instance current_instance = zmk_endpoints_selected();
+    switch (current_instance.transport) {
     case ZMK_TRANSPORT_USB:
 #if IS_ENABLED(CONFIG_WS2812_WIDGET_CONN_SHOW_USB)
         LOG_INF("USB connected");
@@ -216,16 +217,6 @@ static int led_output_listener_cb(const zmk_event_t *eh) {
     return 0;
 }
 
-// Debouncing to ignore all but last connectivity event
-static struct k_work_delayable indicate_connectivity_work;
-static void indicate_connectivity_cb(struct k_work *work) { 
-    indicate_connectivity_internal(); 
-}
-
-void ws2812_indicate_connectivity() { 
-    k_work_reschedule(&indicate_connectivity_work, K_MSEC(16)); 
-}
-
 ZMK_LISTENER(led_output_listener, led_output_listener_cb);
 
 #if !IS_ENABLED(CONFIG_ZMK_SPLIT) || IS_ENABLED(CONFIG_ZMK_SPLIT_ROLE_CENTRAL)
@@ -239,6 +230,18 @@ ZMK_SUBSCRIPTION(led_output_listener, zmk_ble_active_profile_changed);
 ZMK_SUBSCRIPTION(led_output_listener, zmk_split_peripheral_status_changed);
 #endif
 #endif // Connectivity
+
+// Debouncing to ignore all but last connectivity event
+#if IS_ENABLED(CONFIG_WS2812_WIDGET_SHOW_CONNECTIVITY)
+static struct k_work_delayable indicate_connectivity_work;
+static void indicate_connectivity_cb(struct k_work *work) { 
+    indicate_connectivity_internal(); 
+}
+
+void ws2812_indicate_connectivity() { 
+    k_work_reschedule(&indicate_connectivity_work, K_MSEC(16)); 
+}
+#endif
 
 // Layer color mapping: 0=off, 1=red, 2=green, 3=yellow, 4=blue, 5=purple, 6=cyan
 static struct led_rgb get_layer_color(uint8_t layer) {
@@ -321,7 +324,9 @@ extern void led_process_thread(void *d0, void *d1, void *d2) {
     ARG_UNUSED(d1);
     ARG_UNUSED(d2);
 
+#if IS_ENABLED(CONFIG_WS2812_WIDGET_SHOW_CONNECTIVITY)
     k_work_init_delayable(&indicate_connectivity_work, indicate_connectivity_cb);
+#endif
 #if IS_ENABLED(CONFIG_WS2812_WIDGET_SHOW_LAYER_CHANGE)
     k_work_init_delayable(&layer_indicate_work, indicate_layer_cb);
 #endif
