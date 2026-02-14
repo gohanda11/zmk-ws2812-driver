@@ -170,8 +170,8 @@ static void indicate_connectivity_internal(void) {
     };
 
 #if !IS_ENABLED(CONFIG_ZMK_SPLIT) || IS_ENABLED(CONFIG_ZMK_SPLIT_ROLE_CENTRAL)
-    struct zmk_endpoint_instance current_instance = zmk_endpoints_selected();
-    switch (current_instance.transport) {
+    struct zmk_endpoint_instance endpoint = zmk_endpoint_get_selected();
+    switch (endpoint.transport) {
     case ZMK_TRANSPORT_USB:
 #if IS_ENABLED(CONFIG_WS2812_WIDGET_CONN_SHOW_USB)
         LOG_INF("USB connected");
